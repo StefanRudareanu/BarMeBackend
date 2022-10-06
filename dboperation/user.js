@@ -1,4 +1,4 @@
-const jwt = require("../node_modules/jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const ConnectionMongo = require("./connection");
 const config = require("config");
 class User extends ConnectionMongo {
@@ -11,18 +11,21 @@ class User extends ConnectionMongo {
         email: { type: String, required: true, unique: true, trim: true },
         location: { type: String, required: true, trim: true },
         phonenumber: {
-          type: Number,
+          type: String,
           requied: true,
           maxlength: 10,
           minlength: 10,
         },
         type: { type: String, enum: ["barman", "user"], requied: true },
         profileImage: {
-          data: { type: Buffer },
-          content: { type: String },
-          default: {},
+          type: String,
+          default: " ",
         },
         rating: { type: Number, default: 0 },
+        numberrating: { type: Number, default: 0 },
+        specilaDrinks: {
+          type: Array,
+        },
       },
       { minimize: false }
     );
@@ -45,6 +48,27 @@ class User extends ConnectionMongo {
       location: { $in: [city] },
       type: "barman",
     });
+  }
+  async GetUserData(username) {
+    return await this.Usermodel.find({ username: username }).select(
+      "username  email phonenumber profileImage location rating specialDrinks"
+    );
+  }
+  async UploadPhoto(photo, username) {
+    return await this.Usermodel.findOneAndUpdate(
+      { username: username },
+      {
+        profileImage: photo,
+      }
+    );
+  }
+  async AddSpecialDrink(username, drink) {
+    return await this.Usermodel.findOneAndUpdate(
+      { username: username },
+      {
+        $push: { specilaDrinks: drink },
+      }
+    );
   }
 }
 module.exports = User;

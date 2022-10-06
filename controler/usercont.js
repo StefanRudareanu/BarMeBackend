@@ -1,11 +1,11 @@
-const express = require("../node_modules/express");
+const express = require("express");
 const router = express.Router();
 const User = require("../dboperation/user");
-const bcrypt = require("../node_modules/bcrypt");
+const bcrypt = require("bcrypt");
 const UserS = new User();
 const protector = require("./routeprotector");
 const jwt = require("jsonwebtoken");
-const config = require("../node_modules/config");
+const config = require("config");
 
 router.post("/register", async (req, res) => {
   try {
@@ -33,7 +33,7 @@ router.post("/login", async (req, res) => {
     res.status(400).send({ err: error.message });
   }
 });
-router.get("/location/:city", async (req, res) => {
+router.get("/location/:city", protector, async (req, res) => {
   try {
     let data = await UserS.GetUSerProfile(req.params.city);
     res.status(200).send({ data: data });
@@ -41,5 +41,28 @@ router.get("/location/:city", async (req, res) => {
     res.status(400).send({ err: error.message });
   }
 });
-
+router.post("/photo/:username", protector, async (req, res) => {
+  try {
+    await UserS.UploadPhoto(req.body.file, req.params.username);
+    res.status(200).send({ msg: "Photo added" });
+  } catch (error) {
+    res.status(400).send({ err: error.message });
+  }
+});
+router.get("/:username", protector, async (req, res) => {
+  try {
+    const data = await UserS.GetUserData(req.params.username);
+    res.status(200).send({ data: data[0] });
+  } catch (error) {
+    res.status(400).send({ err: error.message });
+  }
+});
+router.patch("/:username", protector, async (req, res) => {
+  try {
+    await UserS.AddSpecialDrink(req.params.username, req.body.drinkname);
+    res.status(200).send({ msg: "Drink updated" });
+  } catch (error) {
+    res.status(400).send({ err: error.message });
+  }
+});
 module.exports = router;

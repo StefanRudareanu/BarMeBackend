@@ -4,10 +4,10 @@ const { token } = require("morgan");
 const { decode } = require("punycode");
 
 function RouteProtector(req, res, next) {
-  token = req.header("auth-token");
+  const token = req.header("auth-token");
   if (!token) res.status(400).send("No token Provided");
   try {
-    let decoded = jwt.verify(token, config.get("authtoken"));
+    const decoded = jwt.verify(token, config.get("authtoken"));
     req.user = decode;
     next();
   } catch (error) {
