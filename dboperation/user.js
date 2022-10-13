@@ -30,7 +30,11 @@ class User extends ConnectionMongo {
       { minimize: false }
     );
     this.Schema.methods.genAuthToken = function () {
-      let data = { username: this.username, type: this.type };
+      let data = {
+        username: this.username,
+        type: this.type,
+        location: this.location,
+      };
       let token = jwt.sign(data, config.get("authtoken"));
       return token;
     };
@@ -51,7 +55,7 @@ class User extends ConnectionMongo {
   }
   async GetUserData(username) {
     return await this.Usermodel.find({ username: username }).select(
-      "username  email phonenumber profileImage location rating specialDrinks"
+      "username  email phonenumber profileImage location rating specilaDrinks"
     );
   }
   async UploadPhoto(photo, username) {
@@ -70,5 +74,26 @@ class User extends ConnectionMongo {
       }
     );
   }
+  async AddRating(barmanusername, rating) {
+    return await this.Usermodel.findOneAndUpdate(
+      { username: barmanusername },
+      {
+        numberrating: this.numberating + 1,
+        rating: rating / this.numberating,
+      }
+    );
+  }
+  async GetBarmanDataBarman(barmanusername, location) {
+    return await this.Usermodel.find({
+      $ne: { username: barmanusername },
+      location: location,
+    }).select("username email phonenumber");
+  }
+  async GetBarmanDataUser(location) {
+    return await this.Usermodel.find({ location: location }).select(
+      "username email phonenumber"
+    );
+  }
 }
+
 module.exports = User;

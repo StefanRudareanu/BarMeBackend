@@ -28,7 +28,13 @@ router.post("/login", async (req, res) => {
     const tdata = jwt.verify(token, config.get("authtoken"));
     const username = tdata.username;
     const type = tdata.type;
-    res.status(200).send({ token: token, username: username, type: type });
+    const location = tdata.location;
+    res.status(200).send({
+      token: token,
+      username: username,
+      type: type,
+      location: location,
+    });
   } catch (error) {
     res.status(400).send({ err: error.message });
   }
@@ -65,4 +71,36 @@ router.patch("/:username", protector, async (req, res) => {
     res.status(400).send({ err: error.message });
   }
 });
+router.patch("rating/:username/:rating", protector, async (req, res) => {
+  try {
+    await AddSpecialDrink(req.params.username, req.params.rating);
+    res.status(200).send({ msg: "Rating added" });
+  } catch (error) {
+    res.status(400).send({ err: error.message });
+  }
+});
+router.get(
+  "/allbarmans/:barmanusername/:location",
+  protector,
+  async (req, res) => {
+    try {
+      const data = await UserS.GetBarmanDataBarman(
+        req.params.barmanusername,
+        req.params.location
+      );
+      res.status(200).send({ data: data });
+    } catch (error) {
+      res.status(400).send({ err: error.message });
+    }
+  }
+);
+router.get("/allbarmansusers/:location", protector, async (req, res) => {
+  try {
+    const data = await UserS.GetBarmanDataUser(req.params.location);
+    res.status(200).send({ data: data });
+  } catch (error) {
+    res.status(400).send({ err: error.message });
+  }
+});
+
 module.exports = router;
