@@ -86,13 +86,15 @@ class User extends ConnectionMongo {
   async GetBarmanDataBarman(barmanusername, location) {
     return await this.Usermodel.find({
       $ne: { username: barmanusername },
+      type: "barman",
       location: location,
     }).select("username email phonenumber");
   }
   async GetBarmanDataUser(location) {
-    return await this.Usermodel.find({ location: location }).select(
-      "username email phonenumber"
-    );
+    return await this.Usermodel.find({
+      location: location,
+      type: "barman",
+    }).select("username email phonenumber");
   }
 }
 
