@@ -102,5 +102,8 @@ router.get("/allbarmansusers/:location", protector, async (req, res) => {
     res.status(400).send({ err: error.message });
   }
 });
-
-module.exports = router;
+router.get("/avaible", protector, (req, res) => {
+  res.status(200).send("Good token");
+});
+module.exports.router = router;
+module.exports.instance = UserS;
