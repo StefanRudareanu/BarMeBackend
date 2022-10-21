@@ -23,7 +23,8 @@ router.post("/", protector, async (req, res) => {
 router.get("/invitationbarman/:username", async (req, res) => {
   try {
     let data = await EventInvitation.GetInvitaionsBarman(req.params.username);
-    res.status(200).send({ data: data[0] });
+    console.log(data[0]);
+    res.status(200).send({ data: data });
   } catch (error) {
     res.status(200).send({ err: error.message });
   }

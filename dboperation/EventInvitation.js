@@ -3,13 +3,17 @@ const ConnectionMongo = require("./connection");
 class Invitation extends ConnectionMongo {
   constructor() {
     super();
-    this.Schema = this.mongoose.Schema({
-      eventDate: { type: String, required: true },
-      eventPlace: { type: String, required: true },
-      drinks: [{ type: String, required: true }],
-      sender: { type: String, required: true, trim: true },
-      reciver: { type: String, required: true, trim: true },
-    });
+    this.Schema = this.mongoose.Schema(
+      {
+        eventDate: { type: String, required: true },
+        eventPlace: { type: String, required: true },
+        drinks: [{ type: String, required: true }],
+        sender: { type: String, required: true, trim: true },
+        reciver: { type: String, required: true, trim: true },
+        inviteState: { type: String, default: "pending" },
+      },
+      { minimize: false }
+    );
     this.Schema.index({ sender: 1, reciver: 1 }, { unique: true });
     this.Invitaions = this.mongoose.model("Invitation", this.Schema);
   }
@@ -20,7 +24,10 @@ class Invitation extends ConnectionMongo {
     return await this.Invitaions.findByIdAndDelete({ _id: id });
   }
   async GetInvitaionsBarman(username) {
-    return await this.Invitaions.find({ reciver: username });
+    return await this.Invitaions.find({
+      reciver: username,
+      inviteState: "pending",
+    });
   }
   async GetInvitationsUser(username) {
     return await this.Invitaions.find({ sender: username });
