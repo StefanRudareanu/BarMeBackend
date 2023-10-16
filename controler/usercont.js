@@ -6,7 +6,6 @@ const UserS = new User();
 const protector = require("./routeprotector");
 const jwt = require("jsonwebtoken");
 const config = require("config");
-
 router.post("/register", async (req, res) => {
   try {
     const salt = await bcrypt.genSalt(10);
@@ -21,21 +20,27 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     let user = await UserS.VeirfyUser(req.body.email);
+    console.log(user);
     if (!user) res.status(400).send({ data: "Invalid Email or Password" });
-    let decode = await bcrypt.compare(req.body.password, user[0].password);
-    if (!decode) res.status(400).send({ data: "Invalid Email or Password" });
-    let token = user[0].genAuthToken();
-    const tdata = jwt.verify(token, config.get("authtoken"));
-    const username = tdata.username;
-    const type = tdata.type;
-    const location = tdata.location;
-    res.status(200).send({
-      token: token,
-      username: username,
-      type: type,
-      location: location,
-    });
+    else {
+      let decode = await bcrypt.compare(req.body.password, user[0].password);
+      if (!decode) res.status(400).send({ data: "Invalid Email or Password" });
+      else {
+        let token = user[0].genAuthToken();
+        const tdata = jwt.verify(token, config.get("authtoken"));
+        const username = tdata.username;
+        const type = tdata.type;
+        const location = tdata.location;
+        res.status(200).send({
+          token: token,
+          username: username,
+          type: type,
+          location: location,
+        });
+      }
+    }
   } catch (error) {
+    console.log(error.message);
     res.status(400).send({ err: error.message });
   }
 });
@@ -83,6 +88,7 @@ router.get(
   "/allbarmans/:barmanusername/:location",
   protector,
   async (req, res) => {
+    console.log(req.params.barmanusername);
     try {
       const data = await UserS.GetBarmanDataBarman(
         req.params.barmanusername,
@@ -105,5 +111,15 @@ router.get("/allbarmansusers/:location", protector, async (req, res) => {
 router.get("/avaible", protector, (req, res) => {
   res.status(200).send("Good token");
 });
+router.patch("/barmanrating/:username", protector, async (req, res) => {
+  try {
+    await UserS.AddRatimg(req.params.username, req.body.rating);
+    res.status(200).send({ message: "Rating added sucessfulyy" });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+    console.log(error.message);
+  }
+});
+
 module.exports.router = router;
 module.exports.instance = UserS;

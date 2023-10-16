@@ -74,18 +74,9 @@ class User extends ConnectionMongo {
       }
     );
   }
-  async AddRating(barmanusername, rating) {
-    return await this.Usermodel.findOneAndUpdate(
-      { username: barmanusername },
-      {
-        numberrating: this.numberating + 1,
-        rating: rating / this.numberating,
-      }
-    );
-  }
   async GetBarmanDataBarman(barmanusername, location) {
     return await this.Usermodel.find({
-      $ne: { username: barmanusername },
+      username: { $ne: barmanusername },
       type: "barman",
       location: location,
     }).select("username email phonenumber");
@@ -95,6 +86,22 @@ class User extends ConnectionMongo {
       location: location,
       type: "barman",
     }).select("username email phonenumber");
+  }
+  async GetBarmanByUsername(username) {
+    return await this.Usermodel.find({ username: username, type: "barman" });
+  }
+  async AddRatimg(username, value) {
+    const data = await this.GetBarmanByUsername(username);
+    const numberrating = data[0].numberrating + 1;
+    const rating = Math.round(data[0].rating + value / numberrating);
+    console.log(data[0].numberrating, data[0].rating, value);
+    return await this.Usermodel.findOneAndUpdate(
+      { username: username, type: "barman" },
+      {
+        numberrating: numberrating,
+        rating: rating,
+      }
+    );
   }
 }
 
